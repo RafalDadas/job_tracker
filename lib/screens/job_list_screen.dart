@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/job_offer.dart';
+import '../repositories/job_repository.dart';
 import '../screens/job_details_screen.dart';
 import '../services/job_database.dart';
 import 'add_job_screen.dart';
@@ -13,14 +14,15 @@ class JobListScreen extends StatefulWidget {
 }
 
 class _JobListScreenState extends State<JobListScreen> {
-  final JobDatabase database = JobDatabase();
+  late final JobRepository repository;
+
   List<JobOffer> jobs = [];
   bool isLoading = true;
   String? errorMessage;
 
   Future<void> _loadJobs() async {
     try {
-      final List<JobOffer> jobsList = await database.getJobs();
+      final List<JobOffer> jobsList = await repository.getJobs();
       if (!mounted) return;
       setState(() {
         jobs = jobsList;
@@ -39,6 +41,7 @@ class _JobListScreenState extends State<JobListScreen> {
   @override
   void initState() {
     super.initState();
+    repository = JobRepository(JobDatabase());
     _loadJobs();
   }
 
@@ -59,7 +62,7 @@ class _JobListScreenState extends State<JobListScreen> {
             job: job,
             onChanged: (JobOffer newJobOffer) async {
               try {
-                await database.updateJob(newJobOffer);
+                await repository.updateJob(newJobOffer);
 
                 if (!mounted) return;
 
@@ -110,7 +113,7 @@ class _JobListScreenState extends State<JobListScreen> {
               );
               if (confirm == true) {
                 try {
-                  await database.deleteJob(job.id);
+                  await repository.deleteJob(job.id);
                 } catch (e) {
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -135,17 +138,29 @@ class _JobListScreenState extends State<JobListScreen> {
       body: _buildBody(),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          final JobOffer? newJob = await Navigator.of(context).push<JobOffer>(
-            MaterialPageRoute(
-              builder: (BuildContext context) => AddJobScreen(jobs: jobs),
-            ),
-          );
-          if (newJob != null) {
-            await database.insertJob(newJob);
+          try {
+            final JobOffer? newJob = await Navigator.of(context).push<JobOffer>(
+              MaterialPageRoute(
+                builder: (BuildContext context) => AddJobScreen(jobs: jobs),
+              ),
+            );
 
-            setState(() {
-              jobs.add(newJob);
-            });
+            if (newJob != null) {
+              final int insertedJobId = await repository.insertJob(newJob);
+              final JobOffer insertedJob = newJob.copyWith(id: insertedJobId);
+
+              if (!mounted) return;
+
+              setState(() {
+                jobs.add(insertedJob);
+              });
+            }
+          } catch (e) {
+            if (mounted) {
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text('Error adding job: $e')));
+            }
           }
         },
         child: const Icon(Icons.add),

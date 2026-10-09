@@ -39,9 +39,9 @@ class JobOffer {
     };
   }
 
-  JobOffer copyWith({Status? status}) {
+  JobOffer copyWith({int? id, Status? status}) {
     return JobOffer(
-      id: id,
+      id: id ?? this.id,
       company: company,
       position: position,
       location: location,

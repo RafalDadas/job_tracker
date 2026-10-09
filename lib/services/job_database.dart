@@ -37,7 +37,9 @@ class JobDatabase {
 
   Future<int> insertJob(JobOffer job) async {
     final db = await database;
-    return db.insert('jobs', job.toMap());
+    final Map<String, dynamic> data = job.toMap();
+    data.remove('id');
+    return db.insert('jobs', data);
   }
 
   Future<int> updateJob(JobOffer job) async {
