@@ -33,7 +33,6 @@ class _AddJobScreenState extends State<AddJobScreen> {
               Navigator.pop(
                 context,
                 JobOffer(
-                  id: widget.jobs.isNotEmpty ? widget.jobs.last.id + 1 : 1,
                   company: companyController.text.trim(),
                   location: locationController.text.trim(),
                   position: positionController.text.trim(),

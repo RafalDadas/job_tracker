@@ -1,24 +1,11 @@
 import '../models/job_offer.dart';
-import '../services/job_database.dart';
 
-class JobRepository {
-  JobRepository(this.database);
+abstract class JobRepository {
+  Future<List<JobOffer>> getJobs();
 
-  final JobDatabase database;
+  Future<int> insertJob(JobOffer job);
 
-  Future<List<JobOffer>> getJobs() {
-    return database.getJobs();
-  }
+  Future<int> updateJob(JobOffer job);
 
-  Future<int> insertJob(JobOffer job) {
-    return database.insertJob(job);
-  }
-
-  Future<int> updateJob(JobOffer job) {
-    return database.updateJob(job);
-  }
-
-  Future<int> deleteJob(int id) {
-    return database.deleteJob(id);
-  }
+  Future<int> deleteJob(int id);
 }

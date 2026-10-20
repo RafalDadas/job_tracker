@@ -2,7 +2,7 @@ enum Status { saved, applied, interview, rejected, offer }
 
 class JobOffer {
   const JobOffer({
-    required this.id,
+    this.id,
     required this.company,
     required this.position,
     required this.location,
@@ -10,7 +10,7 @@ class JobOffer {
     required this.status,
   });
 
-  final int id;
+  final int? id;
   final String company;
   final String position;
   final String location;

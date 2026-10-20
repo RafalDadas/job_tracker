@@ -17,7 +17,7 @@ class JobDatabase {
       onCreate: (Database db, int version) async {
         await db.execute('''CREATE TABLE jobs
           (
-          id INTEGER PRIMARY KEY,
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
           company TEXT NOT NULL,
           position TEXT NOT NULL,
           location TEXT NOT NULL,

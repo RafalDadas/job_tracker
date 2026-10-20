@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/job_offer.dart';
 import '../repositories/job_repository.dart';
+import '../repositories/sqlite_job_repository.dart';
 import '../screens/job_details_screen.dart';
 import '../services/job_database.dart';
 import 'add_job_screen.dart';
@@ -41,7 +42,7 @@ class _JobListScreenState extends State<JobListScreen> {
   @override
   void initState() {
     super.initState();
-    repository = JobRepository(JobDatabase());
+    repository = SqliteJobRepository(JobDatabase());
     _loadJobs();
   }
 
@@ -113,7 +114,7 @@ class _JobListScreenState extends State<JobListScreen> {
               );
               if (confirm == true) {
                 try {
-                  await repository.deleteJob(job.id);
+                  await repository.deleteJob(job.id!);
                 } catch (e) {
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
