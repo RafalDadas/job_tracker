@@ -18,8 +18,23 @@ class _JobListScreenState extends State<JobListScreen> {
   late final JobRepository repository;
 
   List<JobOffer> jobs = [];
+  List<Status?> statusOptions = [null, ...Status.values];
   bool isLoading = true;
+  String searchQuery = '';
   String? errorMessage;
+  Status? selectedStatus;
+
+  List<JobOffer> get filteredJobs {
+    return jobs.where((JobOffer job) {
+      final bool matchesSearch =
+          job.position.toLowerCase().contains(searchQuery.toLowerCase()) ||
+          job.location.toLowerCase().contains(searchQuery.toLowerCase()) ||
+          job.company.toLowerCase().contains(searchQuery.toLowerCase());
+      final bool matchesStatus =
+          selectedStatus == null || job.status == selectedStatus;
+      return matchesStatus && matchesSearch;
+    }).toList();
+  }
 
   Future<void> _loadJobs() async {
     try {
@@ -53,11 +68,13 @@ class _JobListScreenState extends State<JobListScreen> {
       return Center(child: Text('Error: $errorMessage'));
     } else if (jobs.isEmpty) {
       return const Center(child: Text('No jobs yet.'));
+    } else if (filteredJobs.isEmpty) {
+      return const Center(child: Text('No jobs match this filter.'));
     } else {
       return ListView.builder(
-        itemCount: jobs.length,
+        itemCount: filteredJobs.length,
         itemBuilder: (BuildContext context, int index) {
-          JobOffer job = jobs[index];
+          final JobOffer job = filteredJobs[index];
 
           return JobCard(
             job: job,
@@ -136,7 +153,36 @@ class _JobListScreenState extends State<JobListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Job Tracker')),
-      body: _buildBody(),
+      body: Column(
+        children: [
+          TextField(
+            decoration: const InputDecoration(
+              hintText: 'Search company, position or location',
+              prefixIcon: Icon(Icons.search),
+            ),
+            onChanged: (String value) {
+              setState(() {
+                searchQuery = value;
+              });
+            },
+          ),
+          DropdownButton<Status?>(
+            value: selectedStatus,
+            items: statusOptions.map((Status? status) {
+              return DropdownMenuItem<Status?>(
+                value: status,
+                child: Text(status?.label ?? 'All'),
+              );
+            }).toList(),
+            onChanged: (Status? newValue) {
+              setState(() {
+                selectedStatus = newValue;
+              });
+            },
+          ),
+          Expanded(child: _buildBody()),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           try {
