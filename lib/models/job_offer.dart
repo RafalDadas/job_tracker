@@ -39,13 +39,20 @@ class JobOffer {
     };
   }
 
-  JobOffer copyWith({int? id, Status? status}) {
+  JobOffer copyWith({
+    int? id,
+    String? company,
+    String? position,
+    String? location,
+    double? salary,
+    Status? status,
+  }) {
     return JobOffer(
       id: id ?? this.id,
-      company: company,
-      position: position,
-      location: location,
-      salary: salary,
+      company: company ?? this.company,
+      position: position ?? this.position,
+      location: location ?? this.location,
+      salary: salary ?? this.salary,
       status: status ?? this.status,
     );
   }

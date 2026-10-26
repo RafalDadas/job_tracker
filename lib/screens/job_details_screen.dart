@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/job_offer.dart';
+import 'add_job_screen.dart';
 
 class JobDetailsScreen extends StatefulWidget {
   const JobDetailsScreen({super.key, required this.job});
@@ -26,6 +27,23 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
       appBar: AppBar(
         title: Text(job.position),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.edit),
+            onPressed: () async {
+              final JobOffer? updatedJob = await Navigator.push<JobOffer>(
+                context,
+                MaterialPageRoute(
+                  builder: (BuildContext context) => AddJobScreen(job: job),
+                ),
+              );
+
+              if (updatedJob != null) {
+                setState(() {
+                  job = updatedJob;
+                });
+              }
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.check),
             onPressed: (() {

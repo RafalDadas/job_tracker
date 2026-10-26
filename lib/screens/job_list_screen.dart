@@ -218,7 +218,7 @@ class _JobListScreenState extends State<JobListScreen> {
           try {
             final JobOffer? newJob = await Navigator.of(context).push<JobOffer>(
               MaterialPageRoute(
-                builder: (BuildContext context) => AddJobScreen(jobs: jobs),
+                builder: (BuildContext context) => AddJobScreen(),
               ),
             );
 
