@@ -14,9 +14,12 @@ class JobListScreen extends StatefulWidget {
   State<JobListScreen> createState() => _JobListScreenState();
 }
 
+enum JobSortOption { company, position }
+
 class _JobListScreenState extends State<JobListScreen> {
   late final JobRepository repository;
 
+  JobSortOption jobSortOption = JobSortOption.company;
   List<JobOffer> jobs = [];
   List<Status?> statusOptions = [null, ...Status.values];
   bool isLoading = true;
@@ -25,7 +28,7 @@ class _JobListScreenState extends State<JobListScreen> {
   Status? selectedStatus;
 
   List<JobOffer> get filteredJobs {
-    return jobs.where((JobOffer job) {
+    List<JobOffer> filteredJobs = jobs.where((JobOffer job) {
       final bool matchesSearch =
           job.position.toLowerCase().contains(searchQuery.toLowerCase()) ||
           job.location.toLowerCase().contains(searchQuery.toLowerCase()) ||
@@ -34,6 +37,17 @@ class _JobListScreenState extends State<JobListScreen> {
           selectedStatus == null || job.status == selectedStatus;
       return matchesStatus && matchesSearch;
     }).toList();
+
+    filteredJobs.sort((JobOffer a, JobOffer b) {
+      switch (jobSortOption) {
+        case JobSortOption.company:
+          return a.company.compareTo(b.company);
+        case JobSortOption.position:
+          return a.position.compareTo(b.position);
+      }
+    });
+
+    return filteredJobs;
   }
 
   Future<void> _loadJobs() async {
@@ -177,6 +191,22 @@ class _JobListScreenState extends State<JobListScreen> {
             onChanged: (Status? newValue) {
               setState(() {
                 selectedStatus = newValue;
+              });
+            },
+          ),
+          DropdownButton<JobSortOption>(
+            value: jobSortOption,
+            items: JobSortOption.values.map((JobSortOption option) {
+              return DropdownMenuItem<JobSortOption>(
+                value: option,
+                child: Text(option.name),
+              );
+            }).toList(),
+            onChanged: (JobSortOption? newValue) {
+              if (newValue == null) return;
+
+              setState(() {
+                jobSortOption = newValue;
               });
             },
           ),
