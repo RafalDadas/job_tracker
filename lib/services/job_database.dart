@@ -5,7 +5,7 @@ import '../models/job_offer.dart';
 
 class JobDatabase {
   static const String _databaseName = 'job_tracker.db';
-  static const int _databaseVersion = 1;
+  static const int _databaseVersion = 2;
 
   Future<Database> get database async {
     final databasesPath = await getDatabasesPath();
@@ -22,9 +22,15 @@ class JobDatabase {
           position TEXT NOT NULL,
           location TEXT NOT NULL,
           salary REAL,
+          applied_at TEXT,
           status TEXT NOT NULL
           )
           ''');
+      },
+      onUpgrade: (Database db, int oldVersion, int newVersion) async {
+        if (oldVersion < 2) {
+          await db.execute('ALTER TABLE jobs ADD COLUMN applied_at TEXT');
+        }
       },
     );
   }

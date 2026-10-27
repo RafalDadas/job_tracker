@@ -7,6 +7,7 @@ class JobOffer {
     required this.position,
     required this.location,
     this.salary,
+    this.appliedAt,
     required this.status,
   });
 
@@ -15,6 +16,7 @@ class JobOffer {
   final String position;
   final String location;
   final double? salary;
+  final DateTime? appliedAt;
   final Status status;
 
   factory JobOffer.fromJson(Map<String, dynamic> json) {
@@ -24,6 +26,9 @@ class JobOffer {
       position: json['position'],
       location: json['location'],
       salary: json['salary'],
+      appliedAt: json['applied_at'] != null
+          ? DateTime.parse(json['applied_at'] as String)
+          : null,
       status: Status.values.byName(json['status'] as String),
     );
   }
@@ -35,6 +40,7 @@ class JobOffer {
       'position': position,
       'location': location,
       'salary': salary,
+      'applied_at': appliedAt?.toIso8601String(),
       'status': status.name,
     };
   }
@@ -45,6 +51,7 @@ class JobOffer {
     String? position,
     String? location,
     double? salary,
+    DateTime? appliedAt,
     Status? status,
   }) {
     return JobOffer(
@@ -53,6 +60,7 @@ class JobOffer {
       position: position ?? this.position,
       location: location ?? this.location,
       salary: salary ?? this.salary,
+      appliedAt: appliedAt ?? this.appliedAt,
       status: status ?? this.status,
     );
   }
