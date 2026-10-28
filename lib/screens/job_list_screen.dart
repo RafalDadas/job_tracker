@@ -75,7 +75,7 @@ class _JobListScreenState extends State<JobListScreen> {
     _loadJobs();
   }
 
-  Widget _buildBody() {
+  Widget _buildJobCards() {
     if (isLoading) {
       return const Center(child: CircularProgressIndicator());
     } else if (errorMessage != null) {
@@ -210,7 +210,7 @@ class _JobListScreenState extends State<JobListScreen> {
               });
             },
           ),
-          Expanded(child: _buildBody()),
+          Expanded(child: _buildJobCards()),
         ],
       ),
       floatingActionButton: FloatingActionButton(

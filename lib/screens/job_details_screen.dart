@@ -69,12 +69,25 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
               if (value == null) return;
 
               setState(() {
-                job = job.copyWith(status: value);
+                job = job.copyWith(
+                  status: value,
+                  appliedAt: value == Status.applied && job.appliedAt == null
+                      ? DateTime.now()
+                      : job.appliedAt,
+                );
               });
             },
           ),
+          if (job.appliedAt != null)
+            Text('Applied: ${job.appliedAt!.formattedDate}'),
         ],
       ),
     );
+  }
+}
+
+extension DateTimeX on DateTime {
+  String get formattedDate {
+    return '$day.$month.$year';
   }
 }
