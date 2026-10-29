@@ -5,6 +5,7 @@ import '../repositories/job_repository.dart';
 import '../repositories/sqlite_job_repository.dart';
 import '../screens/job_details_screen.dart';
 import '../services/job_database.dart';
+import '../widgets/job_statistics.dart';
 import 'add_job_screen.dart';
 
 class JobListScreen extends StatefulWidget {
@@ -48,6 +49,10 @@ class _JobListScreenState extends State<JobListScreen> {
     });
 
     return filteredJobs;
+  }
+
+  int countByStatus(Status status) {
+    return jobs.where((JobOffer job) => job.status == status).length;
   }
 
   Future<void> _loadJobs() async {
@@ -210,6 +215,7 @@ class _JobListScreenState extends State<JobListScreen> {
               });
             },
           ),
+          JobStatistics(jobs: jobs),
           Expanded(child: _buildJobCards()),
         ],
       ),
