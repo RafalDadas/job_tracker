@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 enum Status { saved, applied, interview, rejected, offer }
 
 class JobOffer {
@@ -79,6 +81,21 @@ extension StatusX on Status {
         return 'Rejected';
       case Status.offer:
         return 'Offer';
+    }
+  }
+
+  Color get color {
+    switch (this) {
+      case Status.saved:
+        return Colors.grey.shade300;
+      case Status.applied:
+        return Colors.blue.shade100;
+      case Status.interview:
+        return Colors.orange.shade100;
+      case Status.rejected:
+        return Colors.red.shade100;
+      case Status.offer:
+        return Colors.green.shade100;
     }
   }
 }

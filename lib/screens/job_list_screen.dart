@@ -291,7 +291,10 @@ class JobCard extends StatelessWidget {
               Text(job.position),
               Text(job.company),
               Text(job.location),
-              Text(job.status.label),
+              Chip(
+                label: Text(job.status.label),
+                backgroundColor: job.status.color,
+              ),
             ],
           ),
         ),
