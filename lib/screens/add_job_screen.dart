@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:job_tracker/screens/job_details_screen.dart';
 
 import '../models/job_offer.dart';
 
@@ -17,6 +18,7 @@ class _AddJobScreenState extends State<AddJobScreen> {
   final TextEditingController locationController = TextEditingController();
   final TextEditingController positionController = TextEditingController();
   final TextEditingController salaryController = TextEditingController();
+  DateTime? selectedAppliedAt;
 
   @override
   void initState() {
@@ -26,6 +28,7 @@ class _AddJobScreenState extends State<AddJobScreen> {
       locationController.text = widget.job!.location;
       positionController.text = widget.job!.position;
       salaryController.text = widget.job!.salary?.toString() ?? '';
+      selectedAppliedAt = widget.job!.appliedAt;
     }
   }
 
@@ -52,6 +55,7 @@ class _AddJobScreenState extends State<AddJobScreen> {
                     location: locationController.text.trim(),
                     position: positionController.text.trim(),
                     salary: salary,
+                    appliedAt: selectedAppliedAt,
                     status: Status.saved,
                   ),
                 );
@@ -63,6 +67,7 @@ class _AddJobScreenState extends State<AddJobScreen> {
                     location: locationController.text.trim(),
                     position: positionController.text.trim(),
                     salary: salary,
+                    appliedAt: selectedAppliedAt
                   ),
                 );
               }
@@ -123,6 +128,28 @@ class _AddJobScreenState extends State<AddJobScreen> {
                 return null;
               },
               keyboardType: TextInputType.numberWithOptions(decimal: true),
+            ),
+            ListTile(
+              title: Text(
+                selectedAppliedAt == null
+                    ? 'Applied date'
+                    : 'Applied: ${selectedAppliedAt!.formattedDate}',
+              ),
+              trailing: const Icon(Icons.calendar_today),
+              onTap: () async {
+                final DateTime? pickedDate = await showDatePicker(
+                  context: context,
+                  initialDate: selectedAppliedAt ?? DateTime.now(),
+                  firstDate: DateTime(2000),
+                  lastDate: DateTime.now(),
+                );
+
+                if (pickedDate == null) return;
+
+                setState(() {
+                  selectedAppliedAt = pickedDate;
+                });
+              },
             ),
           ],
         ),
