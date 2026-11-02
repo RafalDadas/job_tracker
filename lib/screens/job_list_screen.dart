@@ -5,6 +5,7 @@ import '../repositories/job_repository.dart';
 import '../repositories/sqlite_job_repository.dart';
 import '../screens/job_details_screen.dart';
 import '../services/job_database.dart';
+import '../utils/job_filter.dart';
 import '../widgets/job_statistics.dart';
 import 'add_job_screen.dart';
 
@@ -29,17 +30,9 @@ class _JobListScreenState extends State<JobListScreen> {
   Status? selectedStatus;
 
   List<JobOffer> get filteredJobs {
-    List<JobOffer> filteredJobs = jobs.where((JobOffer job) {
-      final bool matchesSearch =
-          job.position.toLowerCase().contains(searchQuery.toLowerCase()) ||
-          job.location.toLowerCase().contains(searchQuery.toLowerCase()) ||
-          job.company.toLowerCase().contains(searchQuery.toLowerCase());
-      final bool matchesStatus =
-          selectedStatus == null || job.status == selectedStatus;
-      return matchesStatus && matchesSearch;
-    }).toList();
+    List<JobOffer> filtered = filterJobs(jobs, searchQuery, selectedStatus);
 
-    filteredJobs.sort((JobOffer a, JobOffer b) {
+    return filtered..sort((JobOffer a, JobOffer b) {
       switch (jobSortOption) {
         case JobSortOption.company:
           return a.company.compareTo(b.company);
@@ -47,8 +40,6 @@ class _JobListScreenState extends State<JobListScreen> {
           return a.position.compareTo(b.position);
       }
     });
-
-    return filteredJobs;
   }
 
   int countByStatus(Status status) {
