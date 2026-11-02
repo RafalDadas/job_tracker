@@ -67,4 +67,48 @@ void main() {
 
     expect(result.length, 2);
   });
+
+  test('sortJobs sorts jobs by company', () {
+    final List<JobOffer> jobs = [
+      JobOffer(
+        company: 'Microsoft',
+        position: 'Dart Developer',
+        location: 'Warsaw',
+        status: Status.saved,
+      ),
+      JobOffer(
+        company: 'Google',
+        position: 'Flutter Developer',
+        location: 'Warsaw',
+        status: Status.applied,
+      ),
+    ];
+
+    final List<JobOffer> result = sortJobs(jobs, JobSortOption.company);
+
+    expect(result.first.company, 'Google');
+    expect(result.last.company, 'Microsoft');
+  });
+
+  test('sortJobs sorts jobs by position', () {
+    final List<JobOffer> jobs = [
+      JobOffer(
+        company: 'Company A',
+        position: 'Senior Flutter Developer',
+        location: 'Warsaw',
+        status: Status.saved,
+      ),
+      JobOffer(
+        company: 'Company B',
+        position: 'Dart Developer',
+        location: 'Warsaw',
+        status: Status.applied,
+      ),
+    ];
+
+    final List<JobOffer> result = sortJobs(jobs, JobSortOption.position);
+
+    expect(result.first.position, 'Dart Developer');
+    expect(result.last.position, 'Senior Flutter Developer');
+  });
 }

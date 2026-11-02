@@ -1,5 +1,7 @@
 import '../models/job_offer.dart';
 
+enum JobSortOption { company, position }
+
 List<JobOffer> filterJobs(
   List<JobOffer> jobs,
   String searchQuery,
@@ -18,4 +20,19 @@ List<JobOffer> filterJobs(
 
     return matchesSearch && matchesStatus;
   }).toList();
+}
+
+List<JobOffer> sortJobs(List<JobOffer> jobs, JobSortOption sortOption) {
+  final List<JobOffer> sortedJobs = [...jobs];
+
+  sortedJobs.sort((JobOffer a, JobOffer b) {
+    switch (sortOption) {
+      case JobSortOption.company:
+        return a.company.compareTo(b.company);
+      case JobSortOption.position:
+        return a.position.compareTo(b.position);
+    }
+  });
+
+  return sortedJobs;
 }

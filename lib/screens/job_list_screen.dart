@@ -16,8 +16,6 @@ class JobListScreen extends StatefulWidget {
   State<JobListScreen> createState() => _JobListScreenState();
 }
 
-enum JobSortOption { company, position }
-
 class _JobListScreenState extends State<JobListScreen> {
   late final JobRepository repository;
 
@@ -32,14 +30,7 @@ class _JobListScreenState extends State<JobListScreen> {
   List<JobOffer> get filteredJobs {
     List<JobOffer> filtered = filterJobs(jobs, searchQuery, selectedStatus);
 
-    return filtered..sort((JobOffer a, JobOffer b) {
-      switch (jobSortOption) {
-        case JobSortOption.company:
-          return a.company.compareTo(b.company);
-        case JobSortOption.position:
-          return a.position.compareTo(b.position);
-      }
-    });
+    return sortJobs(filtered, jobSortOption);
   }
 
   int countByStatus(Status status) {
