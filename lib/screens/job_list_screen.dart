@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../controllers/job_controller.dart';
 import '../models/job_offer.dart';
-import '../repositories/job_repository.dart';
 import '../repositories/sqlite_job_repository.dart';
 import '../screens/job_details_screen.dart';
 import '../services/job_database.dart';
@@ -17,7 +17,7 @@ class JobListScreen extends StatefulWidget {
 }
 
 class _JobListScreenState extends State<JobListScreen> {
-  late final JobRepository repository;
+  late final JobController controller;
 
   JobSortOption jobSortOption = JobSortOption.company;
   List<JobOffer> jobs = [];
@@ -37,29 +37,23 @@ class _JobListScreenState extends State<JobListScreen> {
     return jobs.where((JobOffer job) => job.status == status).length;
   }
 
-  Future<void> _loadJobs() async {
-    try {
-      final List<JobOffer> jobsList = await repository.getJobs();
-      if (!mounted) return;
-      setState(() {
-        jobs = jobsList;
-        isLoading = false;
-        errorMessage = null;
-      });
-    } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        isLoading = false;
-        errorMessage = e.toString();
-      });
-    }
+  Future<void> _loadJobsFromController() async {
+    await controller.loadJobs();
+
+    if (!mounted) return;
+
+    setState(() {
+      jobs = controller.jobs;
+      isLoading = controller.isLoading;
+      errorMessage = controller.errorMessage;
+    });
   }
 
   @override
   void initState() {
     super.initState();
-    repository = SqliteJobRepository(JobDatabase());
-    _loadJobs();
+    controller = JobController(SqliteJobRepository(JobDatabase()));
+    _loadJobsFromController();
   }
 
   Widget _buildJobCards() {
@@ -81,29 +75,24 @@ class _JobListScreenState extends State<JobListScreen> {
             job: job,
             onChanged: (JobOffer newJobOffer) async {
               try {
-                await repository.updateJob(newJobOffer);
+                await controller.updateJob(newJobOffer);
 
                 if (!mounted) return;
 
                 setState(() {
-                  final int index = jobs.indexWhere(
-                    (item) => item.id == newJobOffer.id,
-                  );
-                  if (index != -1) {
-                    jobs[index] = newJobOffer;
-                  }
+                  jobs = controller.jobs;
                 });
               } catch (e) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error updating job: $e')),
-                  );
-                }
+                if (!context.mounted) return;
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Error updating job: $e')),
+                );
               }
             },
             onDismissed: () {
               setState(() {
-                jobs.removeWhere((jobToDelete) => jobToDelete.id == job.id);
+                jobs = controller.jobs;
               });
             },
             confirmDismiss: () async {
@@ -132,13 +121,14 @@ class _JobListScreenState extends State<JobListScreen> {
               );
               if (confirm == true) {
                 try {
-                  await repository.deleteJob(job.id!);
+                  await controller.deleteJob(job.id!);
                 } catch (e) {
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error deleting job: $e')),
-                    );
-                  }
+                  if (!context.mounted) return false;
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Error deleting job: $e')),
+                  );
+
                   return false;
                 }
               }
@@ -211,21 +201,19 @@ class _JobListScreenState extends State<JobListScreen> {
             );
 
             if (newJob != null) {
-              final int insertedJobId = await repository.insertJob(newJob);
-              final JobOffer insertedJob = newJob.copyWith(id: insertedJobId);
+              await controller.addJob(newJob);
 
               if (!mounted) return;
 
               setState(() {
-                jobs.add(insertedJob);
+                jobs = controller.jobs;
               });
             }
           } catch (e) {
-            if (mounted) {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text('Error adding job: $e')));
-            }
+            if (!context.mounted) return;
+
+            ScaffoldMessenger.of(context)
+                .showSnackBar(SnackBar(content: Text('Error adding job: $e')));
           }
         },
         child: const Icon(Icons.add),
