@@ -243,6 +243,9 @@ class JobCard extends StatelessWidget {
       confirmDismiss: (DismissDirection direction) {
         return confirmDismiss();
       },
+      onDismissed: (DismissDirection direction) {
+        onDismissed();
+      },
       child: InkWell(
         onTap: () async {
           final JobOffer? updatedJob = await Navigator.of(context)
