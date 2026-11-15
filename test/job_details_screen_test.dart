@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:job_tracker/models/job_offer.dart';
 import 'package:job_tracker/screens/job_details_screen.dart';
 
