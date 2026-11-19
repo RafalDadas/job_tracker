@@ -20,48 +20,58 @@ class _JobListScreenState extends State<JobListScreen> {
   late final JobController controller;
 
   JobSortOption jobSortOption = JobSortOption.company;
-  List<JobOffer> jobs = [];
   List<Status?> statusOptions = [null, ...Status.values];
-  bool isLoading = true;
   String searchQuery = '';
-  String? errorMessage;
   Status? selectedStatus;
 
   List<JobOffer> get filteredJobs {
-    List<JobOffer> filtered = filterJobs(jobs, searchQuery, selectedStatus);
+    List<JobOffer> filtered = filterJobs(
+      controller.jobs,
+      searchQuery,
+      selectedStatus,
+    );
 
     return sortJobs(filtered, jobSortOption);
   }
 
   int countByStatus(Status status) {
-    return jobs.where((JobOffer job) => job.status == status).length;
+    return controller.jobs.where((JobOffer job) => job.status == status).length;
   }
 
   Future<void> _loadJobsFromController() async {
     await controller.loadJobs();
-
-    if (!mounted) return;
-
-    setState(() {
-      jobs = controller.jobs;
-      isLoading = controller.isLoading;
-      errorMessage = controller.errorMessage;
-    });
   }
 
   @override
   void initState() {
     super.initState();
     controller = JobController(SqliteJobRepository(JobDatabase()));
+
+    controller.addListener(_onControllerChanged);
+
     _loadJobsFromController();
   }
 
+  @override
+  void dispose() {
+    controller.removeListener(_onControllerChanged);
+    controller.dispose();
+
+    super.dispose();
+  }
+
+  void _onControllerChanged() {
+    if (!mounted) return;
+
+    setState(() {});
+  }
+
   Widget _buildJobCards() {
-    if (isLoading) {
+    if (controller.isLoading) {
       return const Center(child: CircularProgressIndicator());
-    } else if (errorMessage != null) {
-      return Center(child: Text('Error: $errorMessage'));
-    } else if (jobs.isEmpty) {
+    } else if (controller.errorMessage != null) {
+      return Center(child: Text('Error: ${controller.errorMessage}'));
+    } else if (controller.jobs.isEmpty) {
       return const Center(child: Text('No jobs yet.'));
     } else if (filteredJobs.isEmpty) {
       return const Center(child: Text('No jobs match this filter.'));
@@ -76,12 +86,6 @@ class _JobListScreenState extends State<JobListScreen> {
             onChanged: (JobOffer newJobOffer) async {
               try {
                 await controller.updateJob(newJobOffer);
-
-                if (!mounted) return;
-
-                setState(() {
-                  jobs = controller.jobs;
-                });
               } catch (e) {
                 if (!context.mounted) return;
 
@@ -90,11 +94,7 @@ class _JobListScreenState extends State<JobListScreen> {
                 );
               }
             },
-            onDismissed: () {
-              setState(() {
-                jobs = controller.jobs;
-              });
-            },
+            onDismissed: () {},
             confirmDismiss: () async {
               final bool? confirm = await showDialog<bool>(
                 context: context,
@@ -187,7 +187,7 @@ class _JobListScreenState extends State<JobListScreen> {
               });
             },
           ),
-          JobStatistics(jobs: jobs),
+          JobStatistics(jobs: controller.jobs),
           Expanded(child: _buildJobCards()),
         ],
       ),
@@ -202,12 +202,6 @@ class _JobListScreenState extends State<JobListScreen> {
 
             if (newJob != null) {
               await controller.addJob(newJob);
-
-              if (!mounted) return;
-
-              setState(() {
-                jobs = controller.jobs;
-              });
             }
           } catch (e) {
             if (!context.mounted) return;
